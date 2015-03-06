@@ -1,0 +1,7 @@
+# User name
+string user
+# User password
+string pass
+---
+# If the user has proper authentication
+bool authenticated

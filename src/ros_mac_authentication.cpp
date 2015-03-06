@@ -15,6 +15,7 @@
 #include <openssl/sha.h>
 #include <ros/ros.h>
 #include <rosauth/Authentication.h>
+#include "rosauth/md5.h"
 #include <sstream>
 #include <string>
 
@@ -27,6 +28,13 @@ using namespace ros;
  * string in the parameter server as the parameter server itself may not be secure.
  */
 #define SECRET_FILE_PARAM "/ros_mac_authentication/secret_file_location"
+
+/*!
+ * \def SECRET_FILE_USERS
+ * The ROS parameter name for the file that contains the users and passwords. We do not store the actual
+ * string in the parameter server as the parameter server itself may not be secure.
+ */
+#define SECRET_FILE_USERS "/ros_mac_authentication/secret_file_users_location"
 
 /*!
  * \def MISSING_PARAMETER
@@ -94,6 +102,57 @@ bool authenticate(rosauth::Authentication::Request &req, rosauth::Authentication
   return true;
 }
 
+bool authenticate_user(rosauth::UserAuthentication::Request &req, rosauth::Authentication::Response &res)
+{
+  // get user and md5 of the password
+  string clinet_user = req.user
+  string client_md5_pass = md5(req.pass)
+  string file;
+  if (!node.getParam(SECRET_FILE_USERS, file))
+  {
+    ROS_ERROR("Parameter '%s' not found.", SECRET_FILE_USERS);
+    return MISSING_PARAMETER;
+  }
+  else
+  {
+    // try and load the file
+    ifstream f;
+    f.open(file.c_str(), ifstream::in);
+
+    if (f.is_open())
+    {
+        string line;
+        while (getline(f, line))
+        {
+            istringstream iss(line);
+            string user, md5_pass;
+            if (!(iss >> user >> md5_pass))
+            {
+                break; // wrong formatted file
+            }
+            else
+            {
+                if (client_user == user && client_md5_pass == md5_pass)
+                {
+                    // user is authenticated
+                    res.authenticated = true;
+                    return true;
+                }
+            }
+        }
+      f.close();
+    }
+    else
+    {
+      ROS_ERROR("Could not read from file '%s'", file.c_str());
+      return FILE_IO_ERROR;
+    }
+  }
+
+  res.authenticated = false;
+  return true;
+}
+
 /*!
  * Creates and runs the ros_mac_authentication node.
  *
@@ -106,6 +165,8 @@ int main(int argc, char **argv)
   // initialize ROS and the node
   init(argc, argv, "ros_mac_authentication");
   NodeHandle node;
+
+  ServiceServer userService = node.advertiseService("authenticate_user", authenticate_user);
 
   // check if we have to check the secret file
   string file;
