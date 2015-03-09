@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp message_generation rostest)
 add_service_files(
   FILES
   Authentication.srv
+  UserAuthentication.srv
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -35,11 +36,11 @@ catkin_package(CATKIN_DEPENDS roscpp message_runtime)
 ###########
 
 include_directories(
-    ${catkin_INCLUDE_DIRS}
+    include ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a cpp executable
-add_executable(ros_mac_authentication src/ros_mac_authentication.cpp)
+add_executable(ros_mac_authentication src/ros_mac_authentication.cpp src/md5.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ros_mac_authentication
