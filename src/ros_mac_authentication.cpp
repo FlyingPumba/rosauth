@@ -110,39 +110,39 @@ bool authenticate_user(rosauth::UserAuthentication::Request &req, rosauth::UserA
   // get user and md5 of the password
   string client_user = req.user;
   string client_md5_pass = md5(req.pass);
-    
-    ifstream f;
-    f.open(secret_file_users.c_str(), ifstream::in);
 
-    if (f.is_open())
+  ifstream f;
+  f.open(secret_file_users.c_str(), ifstream::in);
+
+  if (f.is_open())
+  {
+    string line;
+    while (getline(f, line))
     {
-        string line;
-        while (getline(f, line))
+      istringstream iss(line);
+      string user, md5_pass;
+      if (!(iss >> user >> md5_pass))
+      {
+        break; // wrong formatted file
+      }
+      else
+      {
+        if (client_user == user && client_md5_pass == md5_pass)
         {
-            istringstream iss(line);
-            string user, md5_pass;
-            if (!(iss >> user >> md5_pass))
-            {
-                break; // wrong formatted file
-            }
-            else
-            {
-                if (client_user == user && client_md5_pass == md5_pass)
-                {
-                    ROS_INFO("User '%s' successfully authenticated", client_user.c_str());
-                    // user is authenticated
-                    res.authenticated = true;
-                    return true;
-                }
-            }
+          ROS_INFO("User '%s' successfully authenticated", client_user.c_str());
+          // user is authenticated
+          res.authenticated = true;
+          return true;
         }
-      f.close();
+      }
     }
-    else
-    {
-      ROS_ERROR("Could not read from file '%s'", secret_file_users.c_str());
-      return FILE_IO_ERROR;
-    }
+    f.close();
+  }
+  else
+  {
+    ROS_ERROR("Could not read from file '%s'", secret_file_users.c_str());
+    return FILE_IO_ERROR;
+  }
 
   ROS_INFO("User '%s' failed authentication", client_user.c_str());
   res.authenticated = false;
@@ -169,10 +169,10 @@ int main(int argc, char **argv)
   }
   else
   {
-   ServiceServer userService = node.advertiseService("authenticate_user", authenticate_user);
-   ROS_INFO("ROS UserAuthentication Server Started");
-   spin();
-   return EXIT_SUCCESS;
+    ServiceServer userService = node.advertiseService("authenticate_user", authenticate_user);
+    ROS_INFO("ROS UserAuthentication Server Started");
+    spin();
+    return EXIT_SUCCESS;
   }
 
   // check if we have to check the secret file
