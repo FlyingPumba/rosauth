@@ -110,33 +110,26 @@ bool authenticate_user(rosauth::UserAuthentication::Request &req, rosauth::UserA
   // get user and md5 of the password
   string client_user = req.user;
   string client_md5_pass = md5(req.pass);
-  string aux = "client_user: "+client_user+", client_md5_pass:"+client_md5_pass;
-  ROS_INFO(aux.c_str());
     
     ifstream f;
     f.open(secret_file_users.c_str(), ifstream::in);
 
     if (f.is_open())
     {
-	ROS_INFO("SECRET USERS FILE OPENED");
         string line;
         while (getline(f, line))
         {
-            ROS_INFO("READ A LINE");
             istringstream iss(line);
             string user, md5_pass;
             if (!(iss >> user >> md5_pass))
             {
-		ROS_INFO("SECRET USERS FILE WRONG FORMATED");
                 break; // wrong formatted file
             }
             else
             {
-		string s = "user: "+user+", md5_pass:"+md5_pass;
-		ROS_INFO(s.c_str());
                 if (client_user == user && client_md5_pass == md5_pass)
                 {
-		    ROS_INFO("USER AUTHENTICATED");
+                    ROS_INFO("User '%s' successfully authenticated", client_user.c_str());
                     // user is authenticated
                     res.authenticated = true;
                     return true;
@@ -151,6 +144,7 @@ bool authenticate_user(rosauth::UserAuthentication::Request &req, rosauth::UserA
       return FILE_IO_ERROR;
     }
 
+  ROS_INFO("User '%s' failed authentication", client_user.c_str());
   res.authenticated = false;
   return true;
 }
