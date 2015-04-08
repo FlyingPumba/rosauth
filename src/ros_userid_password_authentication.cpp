@@ -28,7 +28,7 @@ using namespace ros;
  * The ROS parameter name for the file that contains the users and passwords. We do not store the actual
  * string in the parameter server as the parameter server itself may not be secure.
  */
-#define SECRET_FILE_USERS "/rosauth/ros_mac_authentication/secret_file_users_location"
+#define SECRET_FILE_USERS "/rosauth/ros_userid_password_authentication/secret_file_users_location"
 
 /*!
  * \def MISSING_PARAMETER
