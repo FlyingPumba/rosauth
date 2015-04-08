@@ -1,14 +1,11 @@
 /*!
- * \file ros_mac_authentication.cpp
- * \brief Provides authentication via a message authentication codes (MAC).
+ * \file ros_userid_password_authentication.cpp
+ * \brief Provides authentication via an user ID and a password.
  *
  * This node provides a service call that can be used to authenticate a user to use the ROS server.
- * The node relies on a hash string that is made up of several pieces of information and hashed
- * using the SHA-1 algorithm. This node is based on the best-practice method of a message
- * authentication codes (MAC).
+ * This code allows to generate a node for user authentication using an user id and a password.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date March 4, 2013
+ * Based on code from Russell Toris, WPI - rctoris@wpi.edu
  */
 
 #include <fstream>
