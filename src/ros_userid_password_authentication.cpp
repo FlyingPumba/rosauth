@@ -96,7 +96,7 @@ bool authenticate(rosauth::UserIdPasswordAuthentication::Request &req, rosauth::
 }
 
 /*!
- * Creates and runs the ros_user_id_password_authentication node.
+ * Creates and runs the ros_userid_password_authentication node.
  *
  * \param argc argument count that is passed to ros::init
  * \param argv arguments that are passed to ros::init
@@ -105,7 +105,7 @@ bool authenticate(rosauth::UserIdPasswordAuthentication::Request &req, rosauth::
 int main(int argc, char **argv)
 {
   // initialize ROS and the node
-  init(argc, argv, "ros_user_id_password_authentication");
+  init(argc, argv, "ros_userid_password_authentication");
   NodeHandle node;
 
 
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ServiceServer userService = node.advertiseService("authenticate_user_id_password", authenticate);
+    ServiceServer userService = node.advertiseService("authenticate_userid_password", authenticate);
     ROS_INFO("ROS User Authentication Using ID Password Server Started");
     spin();
     return EXIT_SUCCESS;
