@@ -15,8 +15,6 @@
 #include <openssl/sha.h>
 #include <ros/ros.h>
 #include <rosauth/Authentication.h>
-#include <rosauth/UserAuthentication.h>
-#include <rosauth/md5.h>
 #include <sstream>
 #include <string>
 
@@ -29,13 +27,6 @@ using namespace ros;
  * string in the parameter server as the parameter server itself may not be secure.
  */
 #define SECRET_FILE_PARAM "/ros_mac_authentication/secret_file_location"
-
-/*!
- * \def SECRET_FILE_USERS
- * The ROS parameter name for the file that contains the users and passwords. We do not store the actual
- * string in the parameter server as the parameter server itself may not be secure.
- */
-#define SECRET_FILE_USERS "/rosauth/ros_mac_authentication/secret_file_users_location"
 
 /*!
  * \def MISSING_PARAMETER
@@ -63,8 +54,6 @@ using namespace ros;
 
 // the secret string used in the MAC
 string secret;
-
-string secret_file_users;
 
 bool authenticate(rosauth::Authentication::Request &req, rosauth::Authentication::Response &res)
 {
@@ -105,50 +94,6 @@ bool authenticate(rosauth::Authentication::Request &req, rosauth::Authentication
   return true;
 }
 
-bool authenticate_user(rosauth::UserAuthentication::Request &req, rosauth::UserAuthentication::Response &res)
-{
-  // get user and md5 of the password
-  string client_user = req.user;
-  string client_md5_pass = md5(req.pass);
-
-  ifstream f;
-  f.open(secret_file_users.c_str(), ifstream::in);
-
-  if (f.is_open())
-  {
-    string line;
-    while (getline(f, line))
-    {
-      istringstream iss(line);
-      string user, md5_pass;
-      if (!(iss >> user >> md5_pass))
-      {
-        break; // wrong formatted file
-      }
-      else
-      {
-        if (client_user == user && client_md5_pass == md5_pass)
-        {
-          ROS_INFO("User '%s' successfully authenticated", client_user.c_str());
-          // user is authenticated
-          res.authenticated = true;
-          return true;
-        }
-      }
-    }
-    f.close();
-  }
-  else
-  {
-    ROS_ERROR("Could not read from file '%s'", secret_file_users.c_str());
-    return FILE_IO_ERROR;
-  }
-
-  ROS_INFO("User '%s' failed authentication", client_user.c_str());
-  res.authenticated = false;
-  return true;
-}
-
 /*!
  * Creates and runs the ros_mac_authentication node.
  *
@@ -161,19 +106,6 @@ int main(int argc, char **argv)
   // initialize ROS and the node
   init(argc, argv, "ros_mac_authentication");
   NodeHandle node;
-
-  if (!node.getParam(SECRET_FILE_USERS, secret_file_users))
-  {
-    ROS_ERROR("Parameter '%s' not found.", SECRET_FILE_USERS);
-    return MISSING_PARAMETER;
-  }
-  else
-  {
-    ServiceServer userService = node.advertiseService("authenticate_user", authenticate_user);
-    ROS_INFO("ROS UserAuthentication Server Started");
-    spin();
-    return EXIT_SUCCESS;
-  }
 
   // check if we have to check the secret file
   string file;
