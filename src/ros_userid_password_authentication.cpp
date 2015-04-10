@@ -5,6 +5,7 @@
  * This node provides a service call that can be used to authenticate a user to use the ROS server.
  * This code allows to generate a node for user authentication using an user id and a password.
  *
+ * Authors: Ivan Arcuschin, Javier Choclin - iarcuschin@creativa77.com, jchoclin@creativa77.com
  * Based on code from Russell Toris, WPI - rctoris@wpi.edu
  */
 
